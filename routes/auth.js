@@ -61,4 +61,26 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Fetch User Progress
+router.get("/users/progress/:id", async (req, res) => {
+  try {
+    console.log("Fetching progress for user ID:", req.params.id);
+
+    const user = await User.findById(req.params.id).populate(
+      "progress.lessonsCompleted progress.quizzesCompleted"
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    console.log("User Progress:", user.progress);
+
+    res.json({ success: true, progress: user.progress });
+  } catch (error) {
+    console.error("Error fetching user progress:", error.message);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
 module.exports = router;
