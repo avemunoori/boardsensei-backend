@@ -8,6 +8,9 @@ require("dotenv").config();
 
 const app = express();
 
+// Trust proxy setting for express-rate-limit
+app.set("trust proxy", 1);
+
 // Connect to database
 connectDB();
 
@@ -29,13 +32,6 @@ app.use("/api/auth/login", loginLimiter);
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/lessons", require("./routes/lessons"));
 app.use("/api/quizzes", require("./routes/quizzes"));
-
-// Serve React static files
-const path = require("path");
-app.use(express.static(path.join(__dirname, "../client/build")));
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../client/build", "index.html"));
-});
 
 // Centralized error handling
 app.use((err, req, res, next) => {
