@@ -2,6 +2,7 @@ const express = require("express");
 const { body, validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
 const User = require("../models/UserModel");
 const router = express.Router();
 
@@ -66,20 +67,31 @@ router.get("/users/progress/:id", async (req, res) => {
   try {
     console.log("Fetching progress for user ID:", req.params.id);
 
-    const user = await User.findById(req.params.id).populate(
-      "progress.lessonsCompleted progress.quizzesCompleted"
-    );
+    // Validate User ID format
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: "Invalid user ID format" });
+    }
+
+    // Fetch user with progress populated
+    const user = await User.findById(req.params.id)
+      .populate("progress.lessonsCompleted")
+      .populate("progress.quizzesCompleted");
 
     if (!user) {
+      console.log("User not found for ID:", req.params.id);
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
     console.log("User Progress:", user.progress);
 
+    if (!user.progress || (!user.progress.lessonsCompleted.length && !user.progress.quizzesCompleted.length)) {
+      return res.status(400).json({ success: false, message: "No progress found for this user" });
+    }
+
     res.json({ success: true, progress: user.progress });
   } catch (error) {
-    console.error("Error fetching user progress:", error.message);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.error("Error fetching user progress:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error", error: error.message });
   }
 });
 
