@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
@@ -16,8 +15,13 @@ connectDB();
 
 // Middleware
 app.use(helmet()); // Secure HTTP headers
-app.use(cors({ origin: ["https://your-frontend-domain.com", "http://localhost:3000"], credentials: true })); // CORS setup
-app.use(express.json());
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL, "http://localhost:3000"], // Dynamically include Vercel domain
+    credentials: true, // Enable cookies and authorization headers
+  })
+);
+app.use(express.json()); // Parse JSON requests
 app.use(morgan("combined")); // Log HTTP requests
 
 // Rate limiter for login endpoint
