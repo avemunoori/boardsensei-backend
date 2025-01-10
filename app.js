@@ -2,6 +2,7 @@ const express = require("express");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
+const cors = require("cors"); // Import cors
 const connectDB = require("./config/db");
 require("dotenv").config();
 
@@ -18,7 +19,7 @@ app.use(helmet()); // Secure HTTP headers
 app.use(
   cors({
     origin: [process.env.FRONTEND_URL, "http://localhost:3000"], // Dynamically include Vercel domain
-    credentials: true, // Enable cookies and authorization headers
+    credentials: true, // Allow cookies and authorization headers
   })
 );
 app.use(express.json()); // Parse JSON requests
