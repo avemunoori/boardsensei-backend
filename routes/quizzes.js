@@ -1,10 +1,13 @@
 const express = require("express");
-const Quiz = require("../models/QuizModel");
 const router = express.Router();
+
+// Make sure this path and filename exactly match your model file
+const Quiz = require("../models/QuizModel");
 
 // Fetch all quizzes
 router.get("/", async (req, res) => {
   try {
+    // Now that the model is correct, Quiz.find() and populate() should work
     const quizzes = await Quiz.find().populate("lesson", "name description");
     res.json({ success: true, data: quizzes });
   } catch (error) {
