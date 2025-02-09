@@ -1,13 +1,13 @@
+// routes/quizzes.js
 const express = require("express");
 const router = express.Router();
-
-// Make sure this path and filename exactly match your model file
 const Quiz = require("../models/QuizModel");
+const User = require("../models/UserModel");
+const { protect } = require("../middleware/authMiddleware");
 
-// Fetch all quizzes
+// GET all quizzes
 router.get("/", async (req, res) => {
   try {
-    // Now that the model is correct, Quiz.find() and populate() should work
     const quizzes = await Quiz.find().populate("lesson", "name description");
     res.json({ success: true, data: quizzes });
   } catch (error) {
@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Fetch a specific quiz by ID
+// GET one quiz
 router.get("/:id", async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id).populate("lesson", "name description");
@@ -30,12 +30,11 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Submit quiz answers
-router.post("/:id/submit", async (req, res) => {
+// SUBMIT quiz answers - update user progress
+router.post("/:id/submit", protect, async (req, res) => {
   try {
     const { answers } = req.body;
     const quiz = await Quiz.findById(req.params.id);
-
     if (!quiz) {
       return res.status(404).json({ success: false, message: "Quiz not found" });
     }
@@ -47,6 +46,13 @@ router.post("/:id/submit", async (req, res) => {
         score++;
       }
     });
+
+    // Mark quiz as completed for the current user
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { "progress.quizzesCompleted": quiz._id } },
+      { new: true }
+    );
 
     res.json({ success: true, score, message: "Quiz submitted successfully" });
   } catch (error) {

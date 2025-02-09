@@ -1,9 +1,11 @@
+// routes/lessons.js
 const express = require("express");
-const Lesson = require("../models/LessonModel");
-const { body, validationResult } = require("express-validator");
 const router = express.Router();
+const Lesson = require("../models/LessonModel");
+const User = require("../models/UserModel");
+const { protect } = require("../middleware/authMiddleware");
 
-// Fetch all lessons
+// GET all lessons
 router.get("/", async (req, res) => {
   try {
     const lessons = await Lesson.find();
@@ -14,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Fetch specific lesson by ID
+// GET a specific lesson
 router.get("/:id", async (req, res) => {
   try {
     const lesson = await Lesson.findById(req.params.id);
@@ -28,29 +30,31 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Create a new lesson
-router.post(
-  "/",
-  [
-    body("name").not().isEmpty().withMessage("Name is required"),
-    body("description").not().isEmpty().withMessage("Description is required"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, errors: errors.array() });
+// COMPLETE a lesson - update user progress
+router.post("/:id/complete", protect, async (req, res) => {
+  try {
+    const lessonId = req.params.id;
+    const lesson = await Lesson.findById(lessonId);
+    if (!lesson) {
+      return res.status(404).json({ success: false, message: "Lesson not found" });
     }
 
-    try {
-      const { name, description, steps } = req.body;
-      const lesson = new Lesson({ name, description, steps });
-      await lesson.save();
-      res.status(201).json({ success: true, data: lesson });
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ success: false, message: "Server Error" });
-    }
+    // user is attached to req by protect middleware (req.user)
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $addToSet: { "progress.lessonsCompleted": lesson._id } },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: `Lesson "${lesson.name}" marked as completed.`,
+      lessonId: lesson._id,
+    });
+  } catch (error) {
+    console.error("Error completing lesson:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
-);
+});
 
 module.exports = router;
