@@ -2,16 +2,16 @@ const mongoose = require("mongoose");
 
 const quizSchema = new mongoose.Schema(
   {
-    lesson: { type: mongoose.Schema.Types.ObjectId, ref: "Lesson", required: true },
+    openingName: { type: String, required: true }, 
     questions: [
       {
         question: { type: String, required: true },
-        options: [{ type: String, required: true }],
-        answer: { type: String, required: true },
+        choices: [{ type: String, required: true }],
+        correctAnswer: { type: Number, required: true },
       },
     ],
   },
-  { timestamps: true } // Adds createdAt and updatedAt fields
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Quiz", quizSchema);
