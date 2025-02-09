@@ -38,7 +38,7 @@ router.post("/:id/complete", protect, async (req, res) => {
       return res.status(404).json({ success: false, message: "Lesson not found" });
     }
 
-    // Update user's lessonsCompleted
+    // Update user's lessonsCompleted array
     await User.findByIdAndUpdate(
       req.user._id,
       { $addToSet: { "progress.lessonsCompleted": lesson._id } },

@@ -39,7 +39,7 @@ router.post("/:id/submit", protect, async (req, res) => {
       return res.status(404).json({ success: false, message: "Quiz not found" });
     }
 
-    // Calculate score
+    // Calculate Score
     let score = 0;
     quiz.questions.forEach((question, index) => {
       if (question.answer === answers[index]) {
