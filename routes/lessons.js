@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET a specific lesson
+// GET specific lesson
 router.get("/:id", async (req, res) => {
   try {
     const lesson = await Lesson.findById(req.params.id);
@@ -30,16 +30,15 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// COMPLETE a lesson - update user progress
+// COMPLETE a lesson => POST /api/lessons/:id/complete
 router.post("/:id/complete", protect, async (req, res) => {
   try {
-    const lessonId = req.params.id;
-    const lesson = await Lesson.findById(lessonId);
+    const lesson = await Lesson.findById(req.params.id);
     if (!lesson) {
       return res.status(404).json({ success: false, message: "Lesson not found" });
     }
 
-    // user is attached to req by protect middleware (req.user)
+    // Update user's lessonsCompleted
     await User.findByIdAndUpdate(
       req.user._id,
       { $addToSet: { "progress.lessonsCompleted": lesson._id } },

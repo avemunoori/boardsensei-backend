@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET one quiz
+// GET quiz by ID
 router.get("/:id", async (req, res) => {
   try {
     const quiz = await Quiz.findById(req.params.id).populate("lesson", "name description");
@@ -30,7 +30,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// SUBMIT quiz answers - update user progress
+// SUBMIT quiz => update user progress
 router.post("/:id/submit", protect, async (req, res) => {
   try {
     const { answers } = req.body;
@@ -47,7 +47,7 @@ router.post("/:id/submit", protect, async (req, res) => {
       }
     });
 
-    // Mark quiz as completed for the current user
+    // Update progress
     await User.findByIdAndUpdate(
       req.user._id,
       { $addToSet: { "progress.quizzesCompleted": quiz._id } },
