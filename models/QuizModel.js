@@ -1,5 +1,5 @@
 // models/QuizModel.js
-const mongoose = require("mongoose");
+const mongoose = require("mongoose")
 
 const quizSchema = new mongoose.Schema(
   {
@@ -14,7 +14,8 @@ const quizSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
-);
+  { timestamps: true },
+)
 
-module.exports = mongoose.model("Quiz", quizSchema);
+module.exports = mongoose.model("Quiz", quizSchema)
+
